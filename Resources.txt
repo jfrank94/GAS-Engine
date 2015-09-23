@@ -1,0 +1,30 @@
+**** Resources ****
+
+* Downloads *
+
+Java JDK:
+http://www.oracle.com/technetwork/java/javase/downloads/index.html
+
+IDE:
+- Eclipse: http://www.eclipse.org/downloads/
+- IntelliJ: http://www.jetbrains.com/idea/download/index.html
+
+OpenGL:
+- You should just need to ensure that you have an up-to-date graphics driver
+- https://www.opengl.org/wiki/Getting_Started
+
+Lightweight Java Game Library:
+- http://www.lwjgl.org/
+- Setting up LWJGL with IntelliJ: http://wiki.lwjgl.org/index.php?title=Setting_Up_LWJGL_with_IntelliJ_IDEA
+- Setting Up LWJGL with Eclipse: http://wiki.lwjgl.org/index.php?title=Setting_Up_LWJGL_with_Eclipse
+
+* Tutorials *
+
+Pipeline overview: https://www.opengl.org/wiki/Rendering_Pipeline_Overview
+More detailed pipeline overview/explanation : https://fgiesen.wordpress.com/2011/07/09/a-trip-through-the-graphics-pipeline-2011-index/
+OpenGL tutorials here and here : http://www.opengl-tutorial.org/ and http://ogldev.atspace.co.uk/index.html
+OpenGL samples - : http://www.g-truc.net/post-tech-content-sample.html
+A (relatively) simple OpenGL engine : https://github.com/mortennobel/kick
+
+
+
