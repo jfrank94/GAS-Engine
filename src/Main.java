@@ -1,6 +1,4 @@
 import gasengine.Engine;
-import gasengine.messages.MessageReceiver;
-import gasengine.scene.Component;
 import gasengine.scene.Entity;
 import gasengine.scene.Scene;
 

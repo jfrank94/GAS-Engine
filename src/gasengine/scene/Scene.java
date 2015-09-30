@@ -3,6 +3,7 @@ package gasengine.scene;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 
@@ -46,5 +47,29 @@ public class Scene
             .stream()
             .filter(ent -> ent.hasTag(tag))
             .collect(Collectors.toList());
+    }
+
+
+    public void broadcastMessage(String name, Object data)
+    {
+        mEntities.forEach(ent -> ent.sendMessage(name, data));
+    }
+
+    public void broadcastMessage(String name)
+    {
+        broadcastMessage(name, null);
+    }
+
+    public void broadcastMessageTo(String name, Object data, Predicate<? super Entity> predicate)
+    {
+        mEntities
+            .stream()
+            .filter(predicate)
+            .forEach(ent -> ent.sendMessage(name, data));
+    }
+
+    public void broadcastMessageTo(String name, Predicate<? super Entity> predicate)
+    {
+        broadcastMessageTo(name, null, predicate);
     }
 }

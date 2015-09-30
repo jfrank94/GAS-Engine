@@ -29,6 +29,11 @@ public final class Engine
         sInit = true;
     }
 
+    public static void update(double dt)
+    {
+        assertInitialized();
+    }
+
     public static void shutDown()
     {
         assertInitialized();
@@ -41,6 +46,8 @@ public final class Engine
     public static void run()
     {
         assertInitialized();
+
+
     }
 
 

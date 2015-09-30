@@ -206,7 +206,7 @@ public final class Entity
 
     public void sendMessage(String name, Object data)
     {
-        mComponents.forEach(cmp -> cmp.handleMessage(name, data));
+        mComponents.forEach(cmp -> cmp.sendMessage(name, data));
     }
 
     public void sendMessage(String name)

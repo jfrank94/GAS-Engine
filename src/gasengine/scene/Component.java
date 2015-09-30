@@ -1,14 +1,9 @@
 package gasengine.scene;
 
-import gasengine.messages.MessageReceiver;
-
-import java.lang.annotation.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import gasengine.messages.MessageHandler;
 
 
-public abstract class Component extends MessageReceiver
+public abstract class Component extends MessageHandler
 {
     public static class Message
     {
@@ -34,7 +29,7 @@ public abstract class Component extends MessageReceiver
         mEntity = ent;
         mValid = true;
 
-        handleMessage(Message.INITIALIZE);
+        sendMessage(Message.INITIALIZE);
     }
 
     public final void destroy()
@@ -42,7 +37,7 @@ public abstract class Component extends MessageReceiver
         if (!mValid)
             return;
 
-        handleMessage(Message.DESTROYED);
+        sendMessage(Message.DESTROYED);
 
         mEntity.removeComponent(this);
 
@@ -57,16 +52,5 @@ public abstract class Component extends MessageReceiver
     public final boolean isValid() // whether this component is still attached to an entity
     {
         return mValid;
-    }
-
-
-    public void sendMessage(String name, Object data)
-    {
-        mEntity.sendMessage(name, data);
-    }
-
-    public void sendMessage(String name)
-    {
-        sendMessage(name, null);
     }
 }
