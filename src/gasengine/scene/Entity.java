@@ -201,21 +201,6 @@ public final class Entity
 
     public final void update()
     {
-        //
-        mComponents.forEach(cmp -> {
-            if (cmp instanceof Renderable)
-                cmp.update();
-        });
-
-        /* I figure we can specify an update order for components, maybe (Physics, Renderer, Audio).
-        mComponents.forEach(cmp -> {
-            if(cmp instanceof Renderable)
-                cmp.update();
-        });
-        mComponents.forEach(cmp -> {
-            if(cmp instanceof Renderable)
-                cmp.update();
-        });*/
     }
 
     public void sendMessage(String name, Object data)
