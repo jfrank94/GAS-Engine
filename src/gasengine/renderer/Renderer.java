@@ -45,9 +45,6 @@ public class Renderer {
                         .add(mCamDir);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_CULL_FACE);
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
 
         for(Entity entity : entities)
             for (int i = 0; i < mVBos.size(); ++i) {
