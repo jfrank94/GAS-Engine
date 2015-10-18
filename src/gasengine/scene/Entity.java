@@ -1,13 +1,10 @@
 package gasengine.scene;
 
+import gasengine.renderer.Renderable;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -18,7 +15,6 @@ public final class Entity
         public static final String COMPONENT_ADDED = "OnComponentAdded";
         public static final String COMPONENT_REMOVED = "OnComponentRemoved";
     }
-
 
     private String mName;
     private List<String> mTags = new ArrayList<>();
@@ -203,6 +199,24 @@ public final class Entity
         mComponents.remove(cmp);
     }
 
+    public final void update()
+    {
+        //
+        mComponents.forEach(cmp -> {
+            if (cmp instanceof Renderable)
+                cmp.update();
+        });
+
+        /* I figure we can specify an update order for components, maybe (Physics, Renderer, Audio).
+        mComponents.forEach(cmp -> {
+            if(cmp instanceof Renderable)
+                cmp.update();
+        });
+        mComponents.forEach(cmp -> {
+            if(cmp instanceof Renderable)
+                cmp.update();
+        });*/
+    }
 
     public void sendMessage(String name, Object data)
     {

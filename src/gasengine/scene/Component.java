@@ -2,11 +2,6 @@ package gasengine.scene;
 
 import gasengine.messages.MessageReceiver;
 
-import java.lang.annotation.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 
 public abstract class Component extends MessageReceiver
 {
@@ -37,6 +32,11 @@ public abstract class Component extends MessageReceiver
         handleMessage(Message.INITIALIZE);
     }
 
+    final void init_copy(Entity ent)
+    {
+        mEntity = ent;
+    }
+
     public final void destroy()
     {
         if (!mValid)
@@ -58,7 +58,6 @@ public abstract class Component extends MessageReceiver
     {
         return mValid;
     }
-
 
     public void sendMessage(String name, Object data)
     {
