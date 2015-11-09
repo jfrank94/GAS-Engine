@@ -1,4 +1,5 @@
 import gasengine.Engine;
+import gasengine.renderer.Mesh;
 import gasengine.renderer.Renderable;
 import gasengine.scene.Entity;
 import gasengine.scene.Scene;
@@ -11,6 +12,10 @@ public class Main
 {
     public static void main(String[] args)
     {
+        Mesh test = new Mesh("cube.obj");
+        test.sUnitTest();
+
+        /*
         Engine.initialize();
 
         Scene scene = Engine.getScene();
@@ -26,6 +31,7 @@ public class Main
         }
 
         Engine.shutDown();
+        */
     }
 
     public static Scene demo(Scene scene)
