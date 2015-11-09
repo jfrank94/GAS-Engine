@@ -1,5 +1,7 @@
 package gasengine.scene;
 
+import gasengine.Engine;
+import gasengine.messages.MessageReceiver;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -11,19 +13,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
-public final class Entity
+public final class Entity implements MessageReceiver
 {
-    public static class Message
-    {
-        public static final String COMPONENT_ADDED = "OnComponentAdded";
-        public static final String COMPONENT_REMOVED = "OnComponentRemoved";
-    }
-
-
     private String mName;
     private List<String> mTags = new ArrayList<>();
 
-    private Scene mScene;
     private long mId;
     private boolean mValid;
 
@@ -33,9 +27,8 @@ public final class Entity
     private Quaternionf mRotation = new Quaternionf();
     private Matrix4f mTransform = new Matrix4f();
 
-    public Entity(Scene scene, long id)
+    public Entity(long id)
     {
-        mScene = scene;
         mId = id;
         mValid = true;
     }
@@ -48,9 +41,15 @@ public final class Entity
         });
         mComponents.clear();
 
-        mScene.removeEntity(this);
+        Engine.getScene().removeEntity(this);
 
         mValid = false;
+    }
+
+    @Override
+    public void sendMessage(String name, Object data)
+    {
+        mComponents.forEach(cmp -> cmp.sendMessage(name, data));
     }
 
 
@@ -76,9 +75,9 @@ public final class Entity
         rebuildTransform();
     }
 
-    public void getPosition(Vector3f pos)
+    public Vector3f getPosition(Vector3f pos)
     {
-        pos.set(mPosition);
+        return pos.set(mPosition);
     }
 
 
@@ -89,9 +88,9 @@ public final class Entity
         rebuildTransform();
     }
 
-    public void getRotation(Quaternionf rot)
+    public Quaternionf getRotation(Quaternionf rot)
     {
-        rot.set(mRotation);
+        return rot.set(mRotation);
     }
 
 
@@ -146,11 +145,6 @@ public final class Entity
         return mId;
     }
 
-    public Scene getScene()
-    {
-        return mScene;
-    }
-
     public boolean isValid() // whether the entity is currently in the scene
     {
         return mValid;
@@ -163,7 +157,7 @@ public final class Entity
 
         cmp.initialize(this);
 
-        sendMessage(Message.COMPONENT_ADDED, cmp);
+        sendMessage("OnComponentAdded", cmp);
 
         return cmp;
     }
@@ -198,19 +192,8 @@ public final class Entity
 
     void removeComponent(Component cmp) // package visible only (users call cmp.destroy() instead)
     {
-        sendMessage(Message.COMPONENT_REMOVED, cmp);
+        sendMessage("OnComponentRemoved", cmp);
 
         mComponents.remove(cmp);
-    }
-
-
-    public void sendMessage(String name, Object data)
-    {
-        mComponents.forEach(cmp -> cmp.sendMessage(name, data));
-    }
-
-    public void sendMessage(String name)
-    {
-        sendMessage(name, null);
     }
 }

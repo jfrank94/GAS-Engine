@@ -1,8 +1,6 @@
 package gasengine.scene;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -10,13 +8,13 @@ import java.util.stream.Collectors;
 public class Scene
 {
     private long mNextEntId = 0;
-    private List<Entity> mEntities = new ArrayList<>();
+    private HashMap<Long, Entity> mEntities = new HashMap<>();
 
     public Entity addEntity()
     {
-        Entity ent = new Entity(this, mNextEntId);
+        Entity ent = new Entity(mNextEntId);
 
-        mEntities.add(ent);
+        mEntities.put(mNextEntId, ent);
         mNextEntId++;
 
         return ent;
@@ -24,35 +22,44 @@ public class Scene
 
     void removeEntity(Entity ent) // package visible only (users call ent.destroy() instead)
     {
-        mEntities.remove(ent);
+        mEntities.remove(ent.getId());
     }
 
-    public List<Entity> getEntities()
+    public Collection<Entity> getEntities()
     {
-        return Collections.unmodifiableList(mEntities);
+        return Collections.unmodifiableCollection(mEntities.values());
     }
 
-    public Entity getEntityById(long id)
+    public List<Entity> getEntities(Predicate<Entity> predicate)
     {
-        return mEntities
+        return mEntities.values()
             .stream()
-            .filter(ent -> ent.getId() == id)
-            .findFirst()
-            .orElse(null);
+            .filter(predicate)
+            .collect(Collectors.toList());
+    }
+
+    public List<Entity> getEntitiesWithComponent(Class<? extends Component> clazz)
+    {
+        return getEntities(ent -> ent.hasComponent(clazz));
     }
 
     public List<Entity> findEntitiesByTag(String tag)
     {
-        return mEntities
+        return mEntities.values()
             .stream()
             .filter(ent -> ent.hasTag(tag))
             .collect(Collectors.toList());
     }
 
+    public Entity getEntityById(long id)
+    {
+        return mEntities.get(id);
+    }
+
 
     public void broadcastMessage(String name, Object data)
     {
-        mEntities.forEach(ent -> ent.sendMessage(name, data));
+        mEntities.values().forEach(ent -> ent.sendMessage(name, data));
     }
 
     public void broadcastMessage(String name)
@@ -60,15 +67,15 @@ public class Scene
         broadcastMessage(name, null);
     }
 
-    public void broadcastMessageTo(String name, Object data, Predicate<? super Entity> predicate)
+    public void broadcastMessageTo(String name, Object data, Predicate<Entity> predicate)
     {
-        mEntities
+        mEntities.values()
             .stream()
             .filter(predicate)
             .forEach(ent -> ent.sendMessage(name, data));
     }
 
-    public void broadcastMessageTo(String name, Predicate<? super Entity> predicate)
+    public void broadcastMessageTo(String name, Predicate<Entity> predicate)
     {
         broadcastMessageTo(name, null, predicate);
     }

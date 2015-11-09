@@ -2,13 +2,17 @@ package gasengine.scene;
 
 import gasengine.messages.MessageHandler;
 
+import java.lang.annotation.*;
+
 
 public abstract class Component extends MessageHandler
 {
-    public static class Message
+    @Inherited
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    public @interface RequiresComponent
     {
-        public static final String INITIALIZE = "Initialize";
-        public static final String DESTROYED = "OnDestroyed";
+        Class<? extends Component> value();
     }
 
 
@@ -17,19 +21,21 @@ public abstract class Component extends MessageHandler
     private Entity mEntity;
     private boolean mValid;
 
+
     final void initialize(Entity ent) // package visible only (called by the entity when added)
     {
         if (mInit)
             throw new RuntimeException("Tried to re-initialize component");
 
+        mEntity = ent;
+        mValid = true;
+
+        ensureHasRequiredComponents();
         processMessageAnnotations();
 
         mInit = true;
 
-        mEntity = ent;
-        mValid = true;
-
-        sendMessage(Message.INITIALIZE);
+        sendMessage("Initialize");
     }
 
     public final void destroy()
@@ -37,12 +43,27 @@ public abstract class Component extends MessageHandler
         if (!mValid)
             return;
 
-        sendMessage(Message.DESTROYED);
+        sendMessage("OnDestroyed");
 
         mEntity.removeComponent(this);
 
         mValid = false;
     }
+
+    @MessageHook("OnComponentRemoved")
+    private void ensureHasRequiredComponents()
+    {
+        for (RequiresComponent req : this.getClass().getAnnotationsByType(RequiresComponent.class))
+        {
+            if (!mEntity.hasComponent(req.value()))
+            {
+                destroy();
+
+                throw new RuntimeException("Entity is missing required component");
+            }
+        }
+    }
+
 
     public final Entity getEntity()
     {

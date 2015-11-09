@@ -12,15 +12,20 @@ public abstract class MessageHandler implements MessageReceiver
     @Inherited
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
-    public @interface HandlesMessage
+    public @interface MessageHook
     {
         String value() default "";
+    }
+
+    public interface Hook
+    {
+        void invoke(Object data);
     }
 
 
     private boolean mProcessed = false;
 
-    private HashMap<String, List<Method>> mHandlers = new HashMap<>();
+    private HashMap<String, List<Hook>> mHooks = new HashMap<>();
 
     public MessageHandler()
     {
@@ -35,7 +40,7 @@ public abstract class MessageHandler implements MessageReceiver
         Method[] methods = this.getClass().getMethods();
         for (Method method : methods)
         {
-            HandlesMessage annotation = method.getAnnotation(HandlesMessage.class);
+            MessageHook annotation = method.getAnnotation(MessageHook.class);
             if (annotation == null)
                 continue;
 
@@ -47,34 +52,47 @@ public abstract class MessageHandler implements MessageReceiver
             if (message.isEmpty())
                 message = method.getName();
 
-            if (!mHandlers.containsKey(message))
-                mHandlers.put(message, new ArrayList<>());
+            addHook(message, data -> {
+                try
+                {
+                    boolean access = method.isAccessible();
 
-            mHandlers.get(message).add(method);
+                    method.setAccessible(true); // override normal class/method visibility
+
+                    if (method.getParameterCount() == 0)
+                        method.invoke(MessageHandler.this);
+                    else
+                        method.invoke(MessageHandler.this, data);
+
+                    method.setAccessible(access); // restore old state
+                }
+                catch (Exception ex)
+                {
+                    throw new RuntimeException("Failed to invoke message hook: " + ex);
+                }
+            });
         }
 
         mProcessed = true;
     }
 
+    public void addHook(String name, Hook callback)
+    {
+        if (!mHooks.containsKey(name))
+            mHooks.put(name, new ArrayList<>());
+
+        mHooks.get(name).add(callback);
+    }
+
+
     @Override
     public void sendMessage(String name, Object data)
     {
-        if (!mHandlers.containsKey(name))
+        if (!mHooks.containsKey(name))
             return;
 
-        for (Method method : mHandlers.get(name))
-        {
-            try
-            {
-                if (method.getParameterCount() == 0)
-                    method.invoke(this);
-                else
-                    method.invoke(this, data);
-            }
-            catch (Exception ex)
-            {
-                throw new RuntimeException("Failed to invoke message handler: " + ex);
-            }
-        }
+        mHooks
+            .get(name)
+            .forEach(hook -> hook.invoke(data));
     }
 }
