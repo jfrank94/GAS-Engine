@@ -1,0 +1,143 @@
+/* 
+ * Credit for code bases/references go to: 
+ * - http://apiwave.com/java/snippets/removal/org.lwjgl.openal.AL10.alGetBufferi-s
+ * - http://wiki.lwjgl.org/wiki/OpenAL_Tutorial_1_-_Single_Static_Source
+ * - https://github.com/urish/java-openal/blob/master/src/main/java/org/urish/openal/Source.java
+ */
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+
+
+
+
+import org.lwjgl.BufferUtils;
+import org.lwjgl.openal.AL10;
+import org.lwjgl.openal.OpenALException;
+import org.lwjgl.util.WaveData;
+import static  org.lwjgl.openal.AL10.AL_BITS;
+import static  org.lwjgl.openal.AL10.AL_FREQUENCY;
+import static org.lwjgl.openal.AL10.AL_SIZE;
+import static org.lwjgl.openal.AL10.AL_CHANNELS;
+
+
+public class Sound {
+	
+	IntBuffer buffer = BufferUtils.createIntBuffer(1);
+	
+	IntBuffer source = BufferUtils.createIntBuffer(1);
+	
+	FloatBuffer sourcePos = BufferUtils.createFloatBuffer(3).put(new float[] {0.0f, 0.0f, 0.0f});
+	
+	FloatBuffer sourceVel = BufferUtils.createFloatBuffer(3).put(new float[] {0.0f, 0.0f, 0.0f});
+	
+	FloatBuffer listenerPos = BufferUtils.createFloatBuffer(3).put(new float[] {0.0f, 0.0f, 0.0f});
+	
+	FloatBuffer listenerVel = BufferUtils.createFloatBuffer(3).put(new float[] {0.0f, 0.0f, 0.0f}); 
+	
+	private int bufferID = 0;
+	protected int duration = 0;
+	
+	//public final int sourceID;
+	
+	int loadALData() {
+		AL10.alGenBuffers(buffer);
+		if (AL10.alGetError() != AL10.AL_NO_ERROR) {
+			return AL10.AL_FALSE;
+		}
+		java.io.FileInputStream fin = null;
+		try {
+			fin = new java.io.FileInputStream("something.wav");
+		} catch (java.io.FileNotFoundException ex) {
+			System.out.println("File not found.");
+			ex.printStackTrace();
+			return AL10.AL_FALSE;
+		}
+		System.out.println("File found.");
+		WaveData waveFile = WaveData.create(fin);
+		try {
+			fin.close();
+		} catch (java.io.IOException ex) {
+		}
+		
+		AL10.alBufferData(buffer.get(0), waveFile.format, waveFile.data, waveFile.samplerate);
+		waveFile.dispose();
+		
+		if (AL10.alGetError() != AL10.AL_NO_ERROR) {
+			return AL10.AL_FALSE;
+		}
+		
+	    AL10.alSourcei(source.get(0), AL10.AL_BUFFER,   buffer.get(0) );
+	    AL10.alSourcef(source.get(0), AL10.AL_PITCH,    1.0f          );
+	    AL10.alSourcef(source.get(0), AL10.AL_GAIN,     1.0f          );
+	    AL10.alSource (source.get(0), AL10.AL_POSITION, sourcePos     );
+	    AL10.alSource (source.get(0), AL10.AL_VELOCITY, sourceVel     );
+	    AL10.alSourcei(source.get(0), AL10.AL_LOOPING,  AL10.AL_TRUE  );
+	    
+	    if (AL10.alGetError() == AL10.AL_NO_ERROR) {
+	    	return AL10.AL_TRUE;
+	    }
+	    return AL10.AL_FALSE;
+		
+	}
+	
+	public void play() throws OpenALException {
+		AL10.alSourcePlay(source.get(0));
+	}
+	
+	public void pause() throws OpenALException {
+		AL10.alSourcePause(source.get(0));
+	}
+	
+	public void stop() throws OpenALException {
+		AL10.alSourceStop(source.get(0));
+	}
+	
+	
+	public void setGain(float gain) throws OpenALException {
+		AL10.alSourcef(source.get(0), AL10.AL_GAIN, 1.0f);
+	}
+	
+	public void setVelocity(float velocity) throws OpenALException {
+		AL10.alSource(source.get(0), AL10.AL_VELOCITY, sourceVel);
+		
+	}
+	
+	public void setPitch(float pitch) throws OpenALException {
+		AL10.alSourcef(source.get(0), AL10.AL_PITCH, 1.0f);
+	}
+	
+	public void setPosition(float x, float y, float z) throws OpenALException {
+		AL10.alSource(source.get(0),AL10.AL_POSITION, sourcePos);
+	}
+	
+	public int getDuration() {
+		if (duration == 0 && bufferID != 0) {
+			int bits = getBufferBits();
+			int size = getBufferSize();
+			int channels = getChannels();
+			int frequency = getSamplingRate();
+			
+			duration = size / channels / (bits / 0) / frequency;
+		}
+		return duration; 
+	}
+	
+
+	public int getChannels() {
+		return AL10.alGetBufferi(bufferID, AL_CHANNELS);
+	}
+	
+	public int getBufferBits() {
+		return AL10.alGetBufferi(bufferID, AL_BITS);
+	}
+	
+	public int getBufferSize() {
+		return AL10.alGetBufferi(bufferID, AL_SIZE);
+	}
+	public int getSamplingRate() {
+		return AL10.alGetBufferi(bufferID, AL_FREQUENCY);
+	}
+	
+	
+
+}
