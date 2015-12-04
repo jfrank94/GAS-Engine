@@ -1,8 +1,6 @@
 package gasengine.physics;
 
-/**
- * Created by Kate on 10/12/2015.
- */
+
 
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -32,5 +30,41 @@ import org.lwjgl.PointerBuffer;
  */
 
 public class BoundaryBox {
+       float maxx;
+       float maxy;
+       float maxz;
+       float minx;
+       float miny;
+       float minz;
 
-}
+
+      public BoundaryBox(float length, float height, float width, float scale, Vector3f center){ //center is the starting point where it was created
+          minx = center.x - ((length*scale)/2);
+          maxx = center.x + ((length*scale)/2);
+          miny = center.y - ((height*scale)/2);
+          maxy = center.y + ((height*scale)/2);
+          minz = center.z - ((width*scale)/2);
+          maxz = center.z + ((width*scale)/2);
+
+
+ }
+
+
+
+
+
+// public boolean DetectCollision() { //list of every object, or a specific object? entity?
+
+
+  //other entity's boundary box has a minimum and maximum x, y, and z value
+  //if in positive coordinates
+  //1 is 'this' object, 2 is other object
+
+  //if (((minx1 >= minx2) || ((minx1 >= maxx2)) && ((miny1 >= miny2) || ((miny1 >= maxy2)) && ((minz1 >= minz2) || ((minz1 >= maxz2)))
+//  return false;
+
+
+
+
+ }
+
