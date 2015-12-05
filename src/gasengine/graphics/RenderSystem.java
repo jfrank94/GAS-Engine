@@ -9,8 +9,9 @@ import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWvidmode;
+import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GLContext;
+//import org.lwjgl.opengl.GLContext;
 
 import java.nio.ByteBuffer;
 
@@ -66,9 +67,9 @@ public class RenderSystem
         ByteBuffer vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
         glfwSetWindowPos(
-            mWindow,
-            (GLFWvidmode.width(vidmode) - mWidth) / 2,
-            (GLFWvidmode.height(vidmode) - mHeight) / 2
+                mWindow,
+                (GLFWvidmode.width(vidmode) - mWidth) / 2,
+                (GLFWvidmode.height(vidmode) - mHeight) / 2
         );
 
         glfwMakeContextCurrent(mWindow); // make the GL context current
@@ -76,7 +77,8 @@ public class RenderSystem
 
         glfwShowWindow(mWindow);
 
-        GLContext.createFromCurrent(); // create the GL context
+        //GLContext.createFromCurrent(); // create the GL context
+        GL.createCapabilities();
 
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // set the background color
 
