@@ -97,6 +97,7 @@ public class PhysicsUpdate{
 
     private void Move(){
         for (int a = 0; a < MovingObjects.size(); a++){
+            MovingObjects.get(a).accelerate(Time);
             MovingObjects.get(a).move(Time);
         }
         // GoToSleep();

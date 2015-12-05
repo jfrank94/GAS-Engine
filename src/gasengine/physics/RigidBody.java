@@ -42,6 +42,7 @@ public class RigidBody extends Component {
     public Vector3f lastposition; //The position the object was in before it last moved. Movement function should update this.
     public Vector3f position;
     public float terminal;
+    public int whatami;
 
     /**
      * hypothetical class for position changing uses rigid body to get the velocity at any given time, to determine
@@ -50,21 +51,21 @@ public class RigidBody extends Component {
 
 //    org.joml.Vector3f.getPosition();
     //where are the get/setposition functions; I can't actually read anything inside joml
-    public RigidBody(float w, boolean isrigid, Vector3f start, float length, float height, float width, float scale){
+    public RigidBody(float w, boolean isrigid, Vector3f start, float maxval, float scale, int type){
         weight = w;
         asleep = false; //The item will not start out asleep, at least for now.
         gettingsleepy = false;
         rigid = isrigid;
         position = start;
         lastposition = position;
-        box = new BoundaryBox(length, height, width, scale, start);
+        box = new BoundaryBox(maxval, scale, start, type);
         velocity.x = 0;
         velocity.y = 0;
         velocity.z = 0;
         acceleration.x = 0;
         acceleration.y = -9.8f; //WILL PROBABLY NEED TO CONVERT THIS AND OTHER UNITS ONCE WE UNDERSTAND THE SCALE OF THE GRID!!!
         acceleration.z = 0;
-        terminal = (float)Math.sqrt((2*weight)/(1.05f*0.343f*length*width));
+        terminal = (float)Math.sqrt((2*weight)/(1.05f*0.343f*maxval*maxval));
         //.343 is the density of air, most likely to be wrong. 1.05 is cube drag coefficient.
 
                 PhysicsUpdate.AllObjects.add(this); //add this rigid body to the list of all existing rigid bodies
@@ -125,10 +126,18 @@ public class RigidBody extends Component {
             float movementy = time * velocity.y;
             float movementz = time * velocity.z;
 
-            position.x += movementx;
+            position.x += movementx; //Moving center position point
             position.y += movementy;
             position.z += movementz;
 
+            box.minx = movementx; //Moving Boundary box
+            box.maxx = movementx;
+
+            box.miny = movementy;
+            box.maxy = movementy;
+
+            box.minz = movementz;
+            box.maxz = movementz;
             /**
              * EACH BOUNDARY BOX POINT NEEDS TO MOVE BY MOVEMENTX, Y, Z...
              *
