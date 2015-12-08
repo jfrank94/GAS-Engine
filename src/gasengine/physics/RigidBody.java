@@ -32,8 +32,8 @@ public class RigidBody extends Component {
 
     //velocity is a float and a direction pair; perhaps float and float, with the latter being 0-360 degrees?
     //public  =
-    public Vector3f velocity = new Vector3f(0,0,0);
-    public Vector3f acceleration = new Vector3f(0,0,0);
+    public Vector3f velocity;
+    public Vector3f acceleration;
     public float weight;
     public BoundaryBox box;
     public boolean rigid; //If true, the object is fixed in place; this is meant for things such as walls.
@@ -43,7 +43,6 @@ public class RigidBody extends Component {
     public Vector3f position;
     public float terminal;
     public int whatami;
-    public boolean hasbounced;
 
     /**
      * hypothetical class for position changing uses rigid body to get the velocity at any given time, to determine
@@ -52,7 +51,7 @@ public class RigidBody extends Component {
 
 //    org.joml.Vector3f.getPosition();
     //where are the get/setposition functions; I can't actually read anything inside joml
-     public RigidBody(float w, boolean isrigid, Vector3f start, float maxval, float scale, int type){
+    public RigidBody(float w, boolean isrigid, Vector3f start, float maxval, float scale, int type){
         weight = w;
         asleep = false; //The item will not start out asleep, at least for now.
         gettingsleepy = false;
@@ -66,21 +65,10 @@ public class RigidBody extends Component {
         acceleration.x = 0;
         acceleration.y = -9.8f; //WILL PROBABLY NEED TO CONVERT THIS AND OTHER UNITS ONCE WE UNDERSTAND THE SCALE OF THE GRID!!!
         acceleration.z = 0;
-        terminal = 0-(float)Math.sqrt((2*weight)/(1.05f*0.343f*maxval*maxval));
-         hasbounced = false;
-
-         if (rigid == true){
-             asleep = true;
-         }
-
-         System.out.println(terminal);
+        terminal = (float)Math.sqrt((2*weight)/(1.05f*0.343f*maxval*maxval));
         //.343 is the density of air, most likely to be wrong. 1.05 is cube drag coefficient.
 
-                //PhysicsUpdate.AllObjects.add(this); //add this rigid body to the list of all existing rigid bodies
-                //PhysicsUpdate.MovingObjects.add(this);
-        gasengine.Engine.getPhysics().CreatedNewObject(this);
-                
-                //how do be get sphysics from here?
+                PhysicsUpdate.AllObjects.add(this); //add this rigid body to the list of all existing rigid bodies
     }
 
     public void changeacceleration(char d, float accel){
@@ -98,8 +86,6 @@ public class RigidBody extends Component {
 
     }
 
-    //CHANGE LASTPOSITION IN MOVE ALSO!!!
-
     public void accelerate(float time){
         velocity.x = velocity.x + acceleration.x*time;
         if(velocity.x > 100 || velocity.x < -100){    //The 100 here is an arbitrary cap value
@@ -111,9 +97,7 @@ public class RigidBody extends Component {
             }
         }
 
-        //System.out.print("Initial Velocity: " + velocity.y + " New Velocity: ");
         velocity.y = velocity.y + acceleration.y*time;
-        //System.out.print(velocity.y);
         if(velocity.y > 100 || velocity.y < terminal){
             if(velocity.y > 100){
                 velocity.y = 100;
@@ -122,9 +106,6 @@ public class RigidBody extends Component {
                 velocity.y = terminal;
             }
         }
-        //System.out.print(" and to be sure: " + velocity.y);
-        //System.out.println();
-
 
         velocity.z = velocity.z + acceleration.z*time;
         if(velocity.z > 100 || velocity.z < -100){
@@ -140,7 +121,6 @@ public class RigidBody extends Component {
     public void move(float time){
         // if(!rigid) {
             //accelerate(time);
-            this.lastposition = new Vector3f(position.x, position.y, position.z);
 
             float movementx = time * velocity.x;
             float movementy = time * velocity.y;
@@ -150,15 +130,14 @@ public class RigidBody extends Component {
             position.y += movementy;
             position.z += movementz;
 
-            box.minx += movementx; //Moving Boundary box
-            box.maxx += movementx;
+            box.minx = movementx; //Moving Boundary box
+            box.maxx = movementx;
 
-            box.miny += movementy;
-            box.maxy += movementy;
+            box.miny = movementy;
+            box.maxy = movementy;
 
-            box.minz += movementz;
-            box.maxz += movementz;
-
+            box.minz = movementz;
+            box.maxz = movementz;
             /**
              * EACH BOUNDARY BOX POINT NEEDS TO MOVE BY MOVEMENTX, Y, Z...
              *
