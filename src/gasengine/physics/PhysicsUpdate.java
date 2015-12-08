@@ -74,12 +74,24 @@ public class PhysicsUpdate{
 
 
     public PhysicsUpdate (){ //this should only be created once, and before any components exist
+    }
 
+
+    public void CreatedNewObject(RigidBody b) {
+        if (b.rigid == true){ //won't be added to moving objects then.
+            this.AllObjects.add(b);
+        }
+        else {
+            this.MovingObjects.add(b);
+            this.AllObjects.add(b);
+        }
     }
 
 
     public void Update(float time) { //This will be called every frame.
+
         //Order matters, think about it
+        Time = time;
 
         this.Move();
         //perform position updates on objects in MovingObjects
@@ -90,8 +102,6 @@ public class PhysicsUpdate{
 
         this.GoToSleep(); //put objects that have not moved in two frames to sleep
 
-        Time = time;
-
     }
 
 
@@ -99,8 +109,9 @@ public class PhysicsUpdate{
         for (int a = 0; a < MovingObjects.size(); a++){
             MovingObjects.get(a).accelerate(Time);
             MovingObjects.get(a).move(Time);
+            MovingObjects.get(a).getEntity().setPosition(MovingObjects.get(a).position);
         }
-        // GoToSleep();
+        //GoToSleep();
     }
 
 
@@ -110,14 +121,14 @@ public class PhysicsUpdate{
             if(MovingObjects.get(a) != null) { //There's nothing in this space, moving on to the next a.
                 cur = MovingObjects.get(a);
                 if (cur.gettingsleepy == true) { //This item might be about to fall asleep.
-                    if (cur.position == cur.lastposition) {
+                    if (cur.getEntity().getPosition(cur.position) == cur.lastposition) {
                         cur.gettingsleepy = false;
                         cur.asleep = true;
                         MovingObjects.remove(a);} //*** Better way to remove from array? Linked lists would be useful here, but not in collision detection
                     else { cur.gettingsleepy = false; } //at this point, the object has moved again, and is clearly not sleeping
                 }
                 else { if (cur.gettingsleepy == false) { //This item doesn't look like it's sleeping yet.
-                    if (cur.position == cur.lastposition) {
+                    if (cur.getEntity().getPosition(cur.position) == cur.lastposition) {
                         cur.gettingsleepy = true;
                     } //It didn't move last frame; it might be sleeping. (It probably is, but there are some circumstances in which this is not the case.) Next frame will tell us for sure.
                 }}  //Else nothing; the object is still moving and there's no need to change its state.
@@ -148,9 +159,12 @@ public class PhysicsUpdate{
                 if (one != two) { //An object can't collide with itself
 
 
-                    if ( (((one.box.minx <= two.box.maxx) && (one.box.maxx >= two.box.minx))
-                            && ((one.box.miny <= two.box.maxy) && (one.box.maxy >= two.box.miny))
-                            && ((one.box.minz <= two.box.maxz) && (one.box.maxz >= two.box.minz))) ) {
+                    if ( ((((one.box.minx+10000) <= (two.box.maxx+10000)) && ((one.box.maxx+10000) >= (two.box.minx+10000))) //the +10k part is just a really hasty way of dealing with negatives
+                     && (((one.box.miny+10000) <= (two.box.maxy+10000)) && ((one.box.maxy+10000) >= (two.box.miny+10000)))
+                     && (((one.box.minz+10000) <= (two.box.maxz+10000)) && ((one.box.maxz+10000) >= (two.box.minz+10000)))) ){
+                    /**if ( ((((one.box.minx) <= (two.box.maxx)) && ((one.box.maxx) >= (two.box.minx)))
+                            && (((one.box.miny) <= (two.box.maxy)) && ((one.box.maxy) >= (two.box.miny)))
+                            && (((one.box.minz) <= (two.box.maxz)) && ((one.box.maxz) >= (two.box.minz)))) ) {**/
                         rbodpair testarrayforward = new rbodpair(MovingObjects.get(a), AllObjects.get(b)); //Not actually an array - it used to be, but I changed the variable type because the array had too big of an overhead. The name stuck.
                         //rbodpair testarraybackward = new rbodpair(AllObjects.get(b), MovingObjects.get(a)); //Rbodpair is a class that just holds references to two rigid bodies
 
@@ -213,6 +227,18 @@ public class PhysicsUpdate{
             one = CurrentCollisions.get(a).first; //I hope this syntax works
             two = CurrentCollisions.get(a).second;
 
+            if ( ((((one.box.minx+10000) <= (two.box.maxx+10000)) && ((one.box.maxx+10000) >= (two.box.minx+10000)))
+                    && (((one.box.miny+10000) <= (two.box.maxy+10000)) && ((one.box.maxy+10000) >= (two.box.miny+10000)))
+                    && (((one.box.minz+10000) <= (two.box.maxz+10000)) && ((one.box.maxz+10000) >= (two.box.minz+10000))))){
+            /**if ( ((((one.box.minx) <= (two.box.maxx)) && ((one.box.maxx) >= (two.box.minx)))
+                    && (((one.box.miny) <= (two.box.maxy)) && ((one.box.maxy) >= (two.box.miny)))
+                    && (((one.box.minz) <= (two.box.maxz)) && ((one.box.maxz) >= (two.box.minz)))) ){**/ //just making sure this collision hasn't been resolved yet
+
+//                System.out.println("get DUNKED");
+//                System.out.println("Center point exp: " + one.position + "Center point found: (" + ((one.box.maxx + one.box.minx)/2) + " " + ((one.box.maxy + one.box.miny)/2) + " " + + ((one.box.maxz + one.box.minz)/2) + ")");
+//                System.out.println("The position of rigidbody 1 is " + one.box.minx + ", " + one.box.maxx + ", " + one.box.miny + ", " + one.box.maxy + ", " + one.box.minz + ", " + one.box.maxz);
+//                System.out.println("The position of rigidbody 2 is " + two.box.minx + ", " + two.box.maxx + ", " + two.box.miny + ", " + two.box.maxy + ", " + two.box.minz + ", " + two.box.maxz);
+
             //First things first, if an object has been collided with and it is not rigid, it is now awake. Rigid objects are perpetually asleep.
 
             if (two.asleep == true && two.rigid == false) { //one does not need to be checked, for aforementioned reasons
@@ -221,12 +247,33 @@ public class PhysicsUpdate{
             }
             //Okay, we now have two awake objects that have collided. Now what?
 
-            if (two.rigid ==true) {
-                //this is an uneducated dummy response. Change it!
-                one.velocity.x = one.velocity.x*(-1)/(2*one.weight);
-                one.velocity.y = one.velocity.y*(-1)/(2*one.weight);
-                one.velocity.z = one.velocity.z*(-1)/(2*one.weight);
-            }
+                if (two.rigid ==true) { //rigid collisions are different from nonrigid collisions.
+
+              //      one.velocity.y = 0;
+              //      if (one.velocity.x == 0 && one.velocity.z == 0) {
+              //          MovingObjects.remove(one);
+              //          CurrentCollisions.remove(a);
+               //         //a = a-1;
+               //     }
+                        if (one.hasbounced == false) { //currently tailored to floor
+                        //this is an uneducated dummy response. Change it!
+                        System.out.println("We /detected/ a ground collision");
+                        one.velocity.x = one.velocity.x*(-1)/(2*one.weight);
+                        one.velocity.y = 4; //one.velocity.y*(-100)/(2*one.weight);
+                        one.velocity.z = one.velocity.z*(-1)/(2*one.weight);
+                        one.hasbounced = true;
+                    }
+                    else {
+                        one.velocity.y = 0;
+                        if (one.velocity.x == 0 && one.velocity.z == 0) {
+                            MovingObjects.remove(one);
+                            CurrentCollisions.remove(a);
+                            one.hasbounced = false;
+                            //a = a-1;
+                        }
+                    }
+                }
+
             else { //else the other object can move, and the real fun begins. and by fun i mean pain
                 //this is a dummy response; actuality deals with impulse and lots of awful things I just can't right now
                 totalvelx = one.velocity.x + two.velocity.x;
@@ -242,15 +289,15 @@ public class PhysicsUpdate{
 
                 one.velocity.x = (totalvelx*two.weight/(2*one.weight));
                 if (collistype == 0) {
-                    one.velocity.x += givemeanopposite(one.velocity.x); //a little bounce. seriously, though, this is like. totally not cool.
+                    one.velocity.x = givemeanopposite(one.velocity.x); //a little bounce. seriously, though, this is like. totally not cool.
                 }
                 one.velocity.y = (totalvely*two.weight/(2*one.weight));
                 if (collistype == 1) {
-                    one.velocity.y += givemeanopposite(one.velocity.y); //a little bounce. seriously, though, this is like. totally not cool.
+                    one.velocity.y = givemeanopposite(one.velocity.y); //a little bounce. seriously, though, this is like. totally not cool.
                 }
                 one.velocity.z = (totalvelz*two.weight/(2*one.weight));// + (givemeanopposite(one.velocity.z)));
                 if (collistype == 2) {
-                    one.velocity.z += givemeanopposite(one.velocity.z); //a little bounce. seriously, though, this is like. totally not cool.
+                    one.velocity.z = givemeanopposite(one.velocity.z); //a little bounce. seriously, though, this is like. totally not cool.
                 }
                 two.velocity.x = (totalvelx*one.weight/(2*two.weight));
                 two.velocity.y = (totalvely*one.weight/(2*two.weight));
@@ -262,6 +309,15 @@ public class PhysicsUpdate{
         }
 
 
+
+    else {
+                System.out.println("Whatever the hell you want.");
+            //else these objects are no longer colliding and can be removed from the list.
+     CurrentCollisions.remove(a);
+     a = a-1; //arraylist is now one size smaller; needs to move back one so the one at the next 'a' position is not skipped.
     }
+        }
+    }
+
 
 }
