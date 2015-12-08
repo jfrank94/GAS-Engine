@@ -1,16 +1,15 @@
 import gasengine.Engine;
-import gasengine.graphics.Material;
-import gasengine.graphics.Mesh;
-import gasengine.graphics.MeshData;
-import gasengine.graphics.Shader;
+import gasengine.graphics.*;
 import gasengine.messages.MessageHandler;
 import gasengine.scene.Component;
 import gasengine.scene.Entity;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.util.vector.Vector2f;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -22,40 +21,39 @@ import static org.lwjgl.opengl.GL11.*;
 public class TriangleRenderer extends Component
 {
     private static final String VERTEX_SHADER_SOURCE =
-        "#version 330\n" + // shading language version
+            "#version 330\n" + // shading language version
 
-        "layout (location=0) in vec3 _vertexPos;\n" + // vertex position attribute (handled per-vertex by GL after we bind vertex buffer and set up the attribute)
-        "layout (location=1) in vec3 _vertexNorm;\n" +
+                    "layout (location=0) in vec3 _vertexPos;\n" + // vertex position attribute (handled per-vertex by GL after we bind vertex buffer and set up the attribute)
+                    "layout (location=1) in vec3 _vertexNorm;\n" +
 
-        "uniform mat4 _MVP;\n" + // vertex transform uniform (applies to entire object, so we only set it once per frame)
-        "uniform mat4 _World;\n" +
+                    "uniform mat4 _MVP;\n" + // vertex transform uniform (applies to entire object, so we only set it once per frame)
+                    "uniform mat4 _World;\n" +
 
-        "out vec3 Normal0;\n" +
+                    "out vec3 Normal0;\n" +
 
-        "void main() {\n" +
-            "gl_Position = _MVP * vec4(_vertexPos, 1.0);\n" + // vertex position output in clip-space is the vertex transform multiplied by position
-            "Normal0 = (_World * vec4(_vertexNorm, 0.0)).xyz;\n" +
-        "}";
+                    "void main() {\n" +
+                    "gl_Position = _MVP * vec4(_vertexPos, 1.0);\n" + // vertex position output in clip-space is the vertex transform multiplied by position
+                    "Normal0 = (_World * vec4(_vertexNorm, 0.0)).xyz;\n" +
+                    "}";
 
     private static final String FRAGMENT_SHADER_SOURCE =
-        "#version 330\n" + // version
+            "#version 330\n" + // version
 
-        "in vec3 Normal0;\n" +
+                    "in vec3 Normal0;\n" +
 
-        "out vec4 FragColor;\n" +
+                    "out vec4 FragColor;\n" +
 
-        "void main() {\n" +
-            "vec3 color = vec3(1, 1, 1);\n" +
-            "vec3 lightDir = vec3(1, -1, 0);\n" +
-            "float mul = dot(normalize(Normal0), -normalize(lightDir));\n" +
+                    "void main() {\n" +
+                    "vec3 color = vec3(1, 1, 1);\n" +
+                    "vec3 lightDir = vec3(1, -1, 0);\n" +
+                    "float mul = dot(normalize(Normal0), -normalize(lightDir));\n" +
 
-            "if (mul > 0) {\n" +
-                "FragColor = vec4(color * mul, 1);\n" +
-            "} else {\n" +
-                "FragColor = vec4(0, 0, 0, 0);\n" +
-            "}\n" +
-        "}";
-
+                    "if (mul > 0) {\n" +
+                    "FragColor = vec4(color * mul, 1);\n" +
+                    "} else {\n" +
+                    "FragColor = vec4(0, 0, 0, 0);\n" +
+                    "}\n" +
+                    "}";
 
     private int mVertexCount;
     private int mVbo;
@@ -89,6 +87,7 @@ public class TriangleRenderer extends Component
         Mesh mesh = new Mesh(model);
         List<MeshData.Verts> vertices = mesh.getVertices();
         List<MeshData.Face> faces = mesh.getFaces();
+        int dim = mesh.getFacesDim();
 
         List<Vector3f> vertList = new ArrayList<>();
         List<Vector3f> normList = new ArrayList<>();
@@ -97,6 +96,7 @@ public class TriangleRenderer extends Component
 
         for (MeshData.Face face : faces)
         {
+            List<Integer> t = face.indices;
             switch (face.indices.size())
             {
                 case 3:
@@ -105,9 +105,9 @@ public class TriangleRenderer extends Component
                     vertList.add(vertices.get(face.indices.get(2) - 1).vert);
 
                     normal = computeNormal(
-                        vertices.get(face.indices.get(0) - 1).vert,
-                        vertices.get(face.indices.get(1) - 1).vert,
-                        vertices.get(face.indices.get(2) - 1).vert
+                            vertices.get(face.indices.get(0) - 1).vert,
+                            vertices.get(face.indices.get(1) - 1).vert,
+                            vertices.get(face.indices.get(2) - 1).vert
                     );
 
                     normList.add(normal); normList.add(normal); normList.add(normal); // this is all terrible, inefficient and hacky
@@ -124,16 +124,82 @@ public class TriangleRenderer extends Component
                     vertList.add(vertices.get(face.indices.get(3) - 1).vert);
 
                     normal = computeNormal(
-                        vertices.get(face.indices.get(0) - 1).vert,
-                        vertices.get(face.indices.get(1) - 1).vert,
-                        vertices.get(face.indices.get(2) - 1).vert
+                            vertices.get(face.indices.get(0) - 1).vert,
+                            vertices.get(face.indices.get(1) - 1).vert,
+                            vertices.get(face.indices.get(2) - 1).vert
                     );
 
                     normList.add(normal); normList.add(normal); normList.add(normal); // this is all terrible, inefficient and hacky
                     normList.add(normal); normList.add(normal); normList.add(normal);
 
                     break;
+                case 6:
+                    vertList.add(vertices.get(face.indices.get(0) - 1).vert);
+                    vertList.add(vertices.get(face.indices.get(dim) - 1).vert);
+                    if(dim < 3)
+                        vertList.add(vertices.get(face.indices.get(dim*2) - 1).vert);
 
+                    normal = computeNormal(
+                            vertices.get(face.indices.get(0) - 1).vert,
+                            vertices.get(face.indices.get(dim) - 1).vert,
+                            vertices.get(face.indices.get(dim*2) - 1).vert
+                    );
+
+                    normList.add(normal); normList.add(normal); normList.add(normal); // this is all terrible, inefficient and hacky
+
+                    break;
+                case 8:
+                    vertList.add(vertices.get(face.indices.get(0) - 1).vert);
+                    vertList.add(vertices.get(face.indices.get(dim) - 1).vert);
+                    vertList.add(vertices.get(face.indices.get(dim*2) - 1).vert);
+
+                    vertList.add(vertices.get(face.indices.get(0) - 1).vert);
+                    vertList.add(vertices.get(face.indices.get(dim*2) - 1).vert);
+                    vertList.add(vertices.get(face.indices.get(dim*3) - 1).vert);
+
+                    normal = computeNormal(
+                            vertices.get(face.indices.get(0) - 1).vert,
+                            vertices.get(face.indices.get(dim) - 1).vert,
+                            vertices.get(face.indices.get(dim*2) - 1).vert
+                    );
+
+                    normList.add(normal); normList.add(normal); normList.add(normal); // this is all terrible, inefficient and hacky
+                    normList.add(normal); normList.add(normal); normList.add(normal);
+
+                    break;
+                case 9:
+                    vertList.add(vertices.get(face.indices.get(0) - 1).vert);
+                    vertList.add(vertices.get(face.indices.get(dim) - 1).vert);
+                    vertList.add(vertices.get(face.indices.get(dim*2) - 1).vert);
+
+                    normal = computeNormal(
+                            vertices.get(face.indices.get(0) - 1).vert,
+                            vertices.get(face.indices.get(dim) - 1).vert,
+                            vertices.get(face.indices.get(dim*2) - 1).vert
+                    );
+
+                    normList.add(normal); normList.add(normal); normList.add(normal); // this is all terrible, inefficient and hacky
+
+                    break;
+                case 12:
+                    vertList.add(vertices.get(face.indices.get(0) - 1).vert);
+                    vertList.add(vertices.get(face.indices.get(dim) - 1).vert);
+                    vertList.add(vertices.get(face.indices.get(dim*2) - 1).vert);
+
+                    vertList.add(vertices.get(face.indices.get(0) - 1).vert);
+                    vertList.add(vertices.get(face.indices.get(dim*2) - 1).vert);
+                    vertList.add(vertices.get(face.indices.get(dim*3) - 1).vert);
+
+                    normal = computeNormal(
+                            vertices.get(face.indices.get(0) - 1).vert,
+                            vertices.get(face.indices.get(dim) - 1).vert,
+                            vertices.get(face.indices.get(dim*2) - 1).vert
+                    );
+
+                    normList.add(normal); normList.add(normal); normList.add(normal); // this is all terrible, inefficient and hacky
+                    normList.add(normal); normList.add(normal); normList.add(normal);
+
+                    break;
                 default:
                     throw new RuntimeException("Tried to load invalid obj file");
             }
@@ -161,14 +227,13 @@ public class TriangleRenderer extends Component
             });
         vertexBuffer.flip();
 
-        FloatBuffer normalBuffer = BufferUtils.createFloatBuffer(mVertexCount * 3);
-            normList.forEach(norm -> {
-                normalBuffer.put(norm.x);
-                normalBuffer.put(norm.y);
-                normalBuffer.put(norm.z);
-            });
+        FloatBuffer normalBuffer = BufferUtils.createFloatBuffer(normList.size() * 3);
+        normList.forEach(norm -> {
+            normalBuffer.put(norm.x);
+            normalBuffer.put(norm.y);
+            normalBuffer.put(norm.z);
+        });
         normalBuffer.flip();
-
 
         mVbo = GL15.glGenBuffers(); // create the vertex buffer
 
@@ -193,10 +258,10 @@ public class TriangleRenderer extends Component
         Quaternionf q = new Quaternionf();
 
         q.rotateAxis(
-            (float) Math.toRadians(
-                ((((double) System.currentTimeMillis() * mRotSpeed) % 1000) / 1000) * -360 // once very second
-            ),
-            0, 1, 0
+                (float) Math.toRadians(
+                        ((((double) System.currentTimeMillis() * mRotSpeed) % 1000) / 1000) * -360 // once very second
+                ),
+                0, 1, 0
         );
 
         Engine.getRenderSystem()

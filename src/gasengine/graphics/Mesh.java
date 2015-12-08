@@ -23,30 +23,22 @@ public class Mesh {
         }
     }
 
-    public List<MeshData.Verts> getVertices()
-    {
-        return data.getVertices();
-    }
-    public List<MeshData.Face> getFaces()
-    {
-        return data.getFaces();
-    }
+    public List<MeshData.Verts> getVertices() {return data.getVertices();}
+    public List<MeshData.Face> getFaces() {return data.getFaces();}
+    public List<MeshData.TextCoord> getTextureCoords() {return data.getTextureCoords();}
+    public List<MeshData.Normal> getNormals() {return data.getNormals();}
+    public int getFacesDim(){return data.getFacesDim();}
 
 
     public void sUnitTest()
     {
-        List<MeshData.Verts> vertices = this.getVertices();
-        List<MeshData.Face> faces = this.getFaces();
+        List<MeshData.TextCoord> vertices = this.getTextureCoords();
+        List<MeshData.Normal> faces = this.getNormals();
         for(int i = 0; i < vertices.size(); ++i)
-            System.out.println("v " + vertices.get(i).vert.x + " " +
-                vertices.get(i).vert.y + " " + vertices.get(i).vert.z);
+            //System.out.println("v " + vertices.get(i).u + " " + vertices.get(i).v);
         System.out.print("\n\n");
         for(int i = 0; i < faces.size(); ++i) {
-            System.out.print("f ");
-            for (int j = 0; j < faces.get(i).indices.size(); ++j) {
-                System.out.print(faces.get(i).indices.get(j) + " ");
-            }
-            System.out.println();
+            System.out.print("f " + faces.get(i).norm);
         }
     }
 

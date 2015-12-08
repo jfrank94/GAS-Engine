@@ -1,5 +1,6 @@
 package gasengine.graphics;
 
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import java.io.IOException;
@@ -22,7 +23,8 @@ public class MeshData {
         public Vector3f vert;
     }
     public static class TextCoord {
-        public float u, v;
+        //public float u, v;
+        public Vector2f texts;
     }
     public static class Normal {
         //float x, y, z;
@@ -37,6 +39,7 @@ public class MeshData {
     private List<Normal> normals;
     private List<Face> faces;
     private String objFile;
+    private int facesDim;
 
     public MeshData(String filename){
         objFile = filename;
@@ -62,6 +65,7 @@ public class MeshData {
     {
         return faces;
     }
+    public int getFacesDim(){return facesDim;}
 
     public void loadMTL() {}
     public void loadOBJ() throws IOException {
@@ -73,19 +77,24 @@ public class MeshData {
                 Verts newVert = new Verts(); newVert.vert = new Vector3f();
                 String[] spLine = line.split(" ");
                 for(int i = 1; i < spLine.length; ++i) {
-                    float f = Float.parseFloat(spLine[i]);
-                    switch(i){
-                        case 1:
-                            newVert.vert.x = f;
-                            break;
-                        case 2:
-                            newVert.vert.y = f;
-                            break;
-                        case 3:
-                            newVert.vert.z = f;
-                            break;
-                        default:
-                            break;
+                    try{
+                        float f = Float.parseFloat(spLine[i]);
+                        switch(i){
+                            case 1:
+                                newVert.vert.x = f;
+                                break;
+                            case 2:
+                                newVert.vert.y = f;
+                                break;
+                            case 3:
+                                newVert.vert.z = f;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    catch(Exception ex) {
+                        ex.printStackTrace();
                     }
                 }
                 vertices.add(newVert);
@@ -95,16 +104,16 @@ public class MeshData {
             .filter(s -> s.startsWith("vt "))) {
             List<String> textLine = textLines.collect(Collectors.toList());
             textLine.forEach(line -> {
-                TextCoord coord = new TextCoord();
+                TextCoord coord = new TextCoord(); coord.texts = new Vector2f();
                 String[] spLine = line.split(" ");
                 for(int i = 1; i < spLine.length; ++i) {
                     float f = Float.parseFloat(spLine[i]);
                     switch(i){
                         case 1:
-                            coord.u = f;
+                            coord.texts.x = f;
                             break;
                         case 2:
-                            coord.v = f;
+                            coord.texts.y = f;
                             break;
                         default:
                             break;
@@ -146,7 +155,8 @@ public class MeshData {
                 String[] spLine = line.split(" ");
                 for(int i = 1; i < spLine.length; ++i) {
                     String[] sspLine = spLine[i].split("/");
-                    for(int j = 0; j < 1 /*sspLine.length*/; ++j) { // FIXME each entry should be separated (1 2 3 4 5 6 and 1/2 3/4 5/6 are indistinguishable; use only vertex for now)
+                    facesDim = sspLine.length;
+                    for(int j = 0; j < sspLine.length; ++j) { // FIXME each entry should be separated (1 2 3 4 5 6 and 1/2 3/4 5/6 are indistinguishable; use only vertex for now)
                         int f = Math.abs(Integer.parseInt(sspLine[j]));
                         face.indices.add(f);
                     }
