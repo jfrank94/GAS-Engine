@@ -15,7 +15,7 @@ import gasengine.scene.Entity;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.*;
-import org.lwjgl.util.WaveData;
+import org.lwjgl.*;
 import static  org.lwjgl.openal.AL10.*;
 
 

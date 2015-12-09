@@ -13,9 +13,10 @@ public class SoundSystem {
     private static long context;
 
     public SoundSystem(){
-        device = ALC10.alcOpenDevice((ByteBuffer)null);
-        context = ALC10.alcCreateContext(device,(ByteBuffer)null);
-        ALC10.alcMakeContextCurrent(context);
+        ALContext context = ALContext.create();
+        ALDevice device = context.getDevice();
+        context.makeCurrent();
+
     }
 
     public void updateSounds() {
