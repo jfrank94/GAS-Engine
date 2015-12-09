@@ -91,8 +91,6 @@ public final class Engine
         // NOTE physics simulation may want to use fixed time slices in its update routine (http://fabiensanglard.net/timer_and_framerate/)
 
         sRenderSystem.renderScene();
-        sSoundSystem.updateSounds();
-
     }
 
 

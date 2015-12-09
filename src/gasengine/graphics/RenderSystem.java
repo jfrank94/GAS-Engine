@@ -11,6 +11,7 @@ import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWvidmode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GLContext;
 //import org.lwjgl.opengl.GLContext;
 
 import java.nio.ByteBuffer;
@@ -77,8 +78,7 @@ public class RenderSystem
 
         glfwShowWindow(mWindow);
 
-        //GLContext.createFromCurrent(); // create the GL context
-        GL.createCapabilities();
+        GLContext.createFromCurrent(); // create the GL context
 
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // set the background color
 

@@ -1,5 +1,6 @@
 import gasengine.Engine;
 import gasengine.audio.Sound;
+import gasengine.audio.SoundComponent;
 import gasengine.collections.SimpleHashMap;
 import gasengine.graphics.components.Camera;
 import gasengine.scene.Entity;
@@ -14,14 +15,16 @@ public class Main
 {
     public static void main(String[] args)
     {
+        System.setProperty("org.lwjgl.util.Debug", "true");
+
         GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
         int width = gd.getDisplayMode().getWidth();
         int height = gd.getDisplayMode().getHeight();
 
         Engine.initialize(
-                new SimpleHashMap()
-                        .set("win_width", (int) (width * (2f / 3)))
-                        .set("win_height", (int) (height * (2f / 3)))
+            new SimpleHashMap()
+                .set("win_width", (int) (width * (2f / 3)))
+                .set("win_height", (int) (height * (2f / 3)))
         );
 
         Scene scene = Engine.getScene();
@@ -35,11 +38,14 @@ public class Main
         Entity arc = scene.addEntity();
             arc.setPosition(-10, 10, -35);
             arc.addComponent(new TexturedTriangleRenderer("arc.obj", "arc.png", 5, 0.0f));
+            SoundComponent snd = arc.addComponent(new SoundComponent("air_raid.wav"));
+                snd.setLoop(true);
+                snd.play();
 
         Entity teapot = scene.addEntity();
             teapot.setPosition(5, 0, -20);
             teapot.addComponent(new TriangleRenderer("teapot.obj", 2, 0.5f));
-            teapot.addComponent(new Sound());
+            //teapot.addComponent(new Sound());
 
         /*Entity island = scene.addEntity();
             island.setPosition(-200, -50, 100);
@@ -63,8 +69,8 @@ public class Main
             city.addComponent(new TexturedTriangleRenderer("atlantis.obj", "cga1.png", 10, 0.025f));
 
         Entity city2 = scene.addEntity();
-        city2.setPosition(-300, -200, -350);
-        city2.addComponent(new TexturedTriangleRenderer("colony.obj", "fac_231.png", 400, 0.01f));
+            city2.setPosition(-300, -200, -350);
+            city2.addComponent(new TexturedTriangleRenderer("colony.obj", "fac_231.png", 400, 0.01f));
 
         Engine.run();
 
