@@ -29,7 +29,7 @@ public class RenderSystem
 
     private float mFov = 45f;
     private float mZNear = 0.01f;
-    private float mZFar = 1000f;
+    private float mZFar = 10000f;
 
     private Matrix4f mProjectionMatrix = new Matrix4f();
     private Matrix4f mViewMatrix = new Matrix4f();

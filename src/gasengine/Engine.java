@@ -1,5 +1,7 @@
 package gasengine;
 
+import gasengine.audio.Sound;
+import gasengine.audio.SoundSystem;
 import gasengine.collections.SimpleHashMap;
 import gasengine.graphics.RenderSystem;
 import gasengine.graphics.components.Camera;
@@ -9,6 +11,8 @@ import gasengine.scene.Scene;
 public final class Engine
 {
     private static RenderSystem sRenderSystem;
+
+    private static SoundSystem sSoundSystem;
 
     private static Scene sScene;
 
@@ -41,6 +45,8 @@ public final class Engine
             params = new SimpleHashMap();
 
         sRenderSystem = new RenderSystem(params);
+
+        sSoundSystem = new SoundSystem();
 
         sScene = new Scene();
 
@@ -85,6 +91,8 @@ public final class Engine
         // NOTE physics simulation may want to use fixed time slices in its update routine (http://fabiensanglard.net/timer_and_framerate/)
 
         sRenderSystem.renderScene();
+        sSoundSystem.updateSounds();
+
     }
 
 

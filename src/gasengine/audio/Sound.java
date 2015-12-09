@@ -10,17 +10,16 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 
+import gasengine.scene.Component;
+import gasengine.scene.Entity;
+import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.openal.AL10;
-import org.lwjgl.openal.OpenALException;
+import org.lwjgl.openal.*;
 import org.lwjgl.util.WaveData;
-import static  org.lwjgl.openal.AL10.AL_BITS;
-import static  org.lwjgl.openal.AL10.AL_FREQUENCY;
-import static org.lwjgl.openal.AL10.AL_SIZE;
-import static org.lwjgl.openal.AL10.AL_CHANNELS;
+import static  org.lwjgl.openal.AL10.*;
 
 
-public class Sound {
+public class Sound extends Component{
 
     IntBuffer buffer = BufferUtils.createIntBuffer(1);
 
@@ -35,18 +34,25 @@ public class Sound {
     FloatBuffer listenerVel = BufferUtils.createFloatBuffer(3).put(new float[] {0.0f, 0.0f, 0.0f});
 
     private int bufferID = 0;
+    private int sourceID = 0;
     protected int duration = 0;
 
-    //public final int sourceID;
+    long device;
+
+    public Sound(){
+        loadALData();
+        update();
+    }
 
     int loadALData() {
-        AL10.alGenBuffers(buffer);
+        bufferID = AL10.alGenBuffers();
+        sourceID = AL10.alGenSources();
         if (AL10.alGetError() != AL10.AL_NO_ERROR) {
             return AL10.AL_FALSE;
         }
         java.io.FileInputStream fin = null;
         try {
-            fin = new java.io.FileInputStream("something.wav");
+            fin = new java.io.FileInputStream("sound/air_raid.wav");
         } catch (java.io.FileNotFoundException ex) {
             System.out.println("File not found.");
             ex.printStackTrace();
@@ -59,19 +65,19 @@ public class Sound {
         } catch (java.io.IOException ex) {
         }
 
-        AL10.alBufferData(buffer.get(0), waveFile.format, waveFile.data, waveFile.samplerate);
+        AL10.alBufferData(buffer.get(bufferID), waveFile.format, waveFile.data, waveFile.samplerate);
         waveFile.dispose();
 
         if (AL10.alGetError() != AL10.AL_NO_ERROR) {
             return AL10.AL_FALSE;
         }
 
-        AL10.alSourcei(source.get(0), AL10.AL_BUFFER,   buffer.get(0) );
-        AL10.alSourcef(source.get(0), AL10.AL_PITCH,    1.0f          );
-        AL10.alSourcef(source.get(0), AL10.AL_GAIN,     1.0f          );
-        AL10.alSourcefv (source.get(0), AL10.AL_POSITION, sourcePos     );
-        AL10.alSourcefv (source.get(0), AL10.AL_VELOCITY, sourceVel     );
-        AL10.alSourcei(source.get(0), AL10.AL_LOOPING,  AL10.AL_TRUE  );
+        AL10.alSourcei(source.get(sourceID), AL10.AL_BUFFER,   buffer.get(bufferID) );
+        AL10.alSourcef(source.get(sourceID), AL10.AL_PITCH,    1.0f          );
+        AL10.alSourcef(source.get(sourceID), AL10.AL_GAIN,     1.0f          );
+        AL10.alSourcefv(source.get(sourceID), AL10.AL_POSITION, sourcePos);
+        AL10.alSourcefv(source.get(sourceID), AL10.AL_VELOCITY, sourceVel);
+        AL10.alSourcei(source.get(sourceID), AL10.AL_LOOPING,  AL10.AL_TRUE  );
 
         if (AL10.alGetError() == AL10.AL_NO_ERROR) {
             return AL10.AL_TRUE;
@@ -79,35 +85,35 @@ public class Sound {
         return AL10.AL_FALSE;
 
     }
-
+    @MessageHook("CollidedWith")
     public void play() throws OpenALException {
-        AL10.alSourcePlay(source.get(0));
+        AL10.alSourcePlay(source.get(sourceID));
     }
 
     public void pause() throws OpenALException {
-        AL10.alSourcePause(source.get(0));
+        AL10.alSourcePause(source.get(sourceID));
     }
 
     public void stop() throws OpenALException {
-        AL10.alSourceStop(source.get(0));
+        AL10.alSourceStop(source.get(sourceID));
     }
 
 
     public void setGain(float gain) throws OpenALException {
-        AL10.alSourcef(source.get(0), AL10.AL_GAIN, 1.0f);
+        AL10.alSourcef(source.get(sourceID), AL10.AL_GAIN, 1.0f);
     }
 
     public void setVelocity(float velocity) throws OpenALException {
-        AL10.alSourcefv(source.get(0), AL10.AL_VELOCITY, sourceVel);
+        AL10.alSourcefv(source.get(sourceID), AL10.AL_VELOCITY, sourceVel);
 
     }
 
     public void setPitch(float pitch) throws OpenALException {
-        AL10.alSourcef(source.get(0), AL10.AL_PITCH, 1.0f);
+        AL10.alSourcef(source.get(sourceID), AL10.AL_PITCH, 1.0f);
     }
 
     public void setPosition(float x, float y, float z) throws OpenALException {
-        AL10.alSourcefv(source.get(0),AL10.AL_POSITION, sourcePos);
+        AL10.alSourcefv(source.get(sourceID), AL10.AL_POSITION, sourcePos);
     }
 
     public int getDuration() {
@@ -136,6 +142,22 @@ public class Sound {
     }
     public int getSamplingRate() {
         return AL10.alGetBufferi(bufferID, AL_FREQUENCY);
+    }
+
+    private void updatePosition() {
+        Vector3f position = new Vector3f();
+        float[] pos = new float[]{(float) position.x, position.y, position.z};
+        Vector3f dir = new Vector3f(0, 0, 0);
+        Entity cam = getEntity();
+        Vector3f cameraPos = cam.getPosition(new Vector3f().add(dir));
+        pos[0] -= cameraPos.x;
+        pos[1] -= cameraPos.y;
+        pos[2] -= cameraPos.z;
+        AL10.alSource3f(source.get(sourceID), AL10.AL_POSITION, pos[0], pos[1], pos[2]);
+    }
+    public void update() {
+        updatePosition();
+        play();
     }
 
 

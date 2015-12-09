@@ -47,19 +47,19 @@ public class TexturedTriangleRenderer extends Component
                     "in vec2 textureCoords;\n" +
 
                     "out vec4 FragColor;\n" +
+
                     "uniform sampler2D texture_diffuse;\n" +
 
                     "void main() {\n" +
-                        "vec3 color = vec3(1, 1, 1);\n" +
-                        "vec3 lightDir = vec3(1, -1, 0);\n" +
-                        "float mul = dot(normalize(Normal0), -normalize(lightDir));\n" +
+                    "vec3 color = vec3(1, 1, 1);\n" +
+                    "vec3 lightDir = vec3(1, -1, 0);\n" +
+                    "float mul = dot(normalize(Normal0), -normalize(lightDir));\n" +
 
-                        "if (mul > 0) {\n" +
-                            "FragColor = vec4(color * mul, 1);\n" +
-                        "} else {\n" +
-                            "FragColor = vec4(0, 0, 0, 0);\n" +
-                        "}\n" +
-                        "FragColor = texture(texture_diffuse, textureCoords.st);\n" +
+                    "if (mul > 0) {\n" +
+                    "FragColor = texture(texture_diffuse, textureCoords.st) * clamp(mul, 0.1, 1);\n" +
+                    "} else {\n" +
+                    "FragColor = vec4(0, 0, 0, 0);\n" +
+                    "}\n" +
                     "}";
 
     private int mVertexCount;
