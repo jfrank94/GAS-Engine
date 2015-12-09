@@ -34,13 +34,16 @@ public class Main
             cam.addComponent(new CameraController());
             cam.setPosition(0, 0, 10);
 
+        Entity arc1 = scene.addEntity();
+        arc1.setPosition(-10, 15, -35);
+        arc1.addComponent(new TriangleRenderer("arc.obj", 5, 0.0f));
 
         Entity arc = scene.addEntity();
             arc.setPosition(-10, 10, -35);
             arc.addComponent(new TexturedTriangleRenderer("arc.obj", "arc.png", 5, 0.0f));
             SoundComponent snd = arc.addComponent(new SoundComponent("air_raid.wav"));
                 snd.setLoop(true);
-                snd.play();
+
 
         Entity teapot = scene.addEntity();
             teapot.setPosition(5, 0, -20);
@@ -71,6 +74,8 @@ public class Main
         Entity city2 = scene.addEntity();
             city2.setPosition(-300, -200, -350);
             city2.addComponent(new TexturedTriangleRenderer("colony.obj", "fac_231.png", 400, 0.01f));
+
+        snd.play(); // do it here, once it has a chance to load everything else
 
         Engine.run();
 

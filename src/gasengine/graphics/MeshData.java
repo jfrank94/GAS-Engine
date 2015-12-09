@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,7 +31,9 @@ public class MeshData {
     }
     public static class Face {
         //int posIndex, textIndex, normIndex;
-        public List<Integer> indices;
+        public List<Integer> vertexIndices;
+        public List<Integer> textureIndices;
+        public List<Integer> normalIndices;
     }
     private List<Verts> vertices;
     private List<TextCoord> textureCoords;
@@ -151,14 +152,33 @@ public class MeshData {
             .filter(s -> s.startsWith("f "))) {
             List<String> faceLine = faceLines.collect(Collectors.toList());
             faceLine.forEach(line -> {
-                Face face = new Face(); face.indices = new ArrayList<>();
+                Face face = new Face();
+                    face.vertexIndices = new ArrayList<>();
+                    face.textureIndices = new ArrayList<>();
+                    face.normalIndices = new ArrayList<>();
+
                 String[] spLine = line.split(" ");
                 for(int i = 1; i < spLine.length; ++i) {
                     String[] sspLine = spLine[i].split("/");
                     facesDim = sspLine.length;
                     for(int j = 0; j < sspLine.length; ++j) { // FIXME each entry should be separated (1 2 3 4 5 6 and 1/2 3/4 5/6 are indistinguishable; use only vertex for now)
                         int f = Math.abs(Integer.parseInt(sspLine[j]));
-                        face.indices.add(f);
+
+                        switch (j)
+                        {
+                            case 0:
+                                face.vertexIndices.add(f);
+                                break;
+
+                            case 1:
+                                face.textureIndices.add(f);
+                                break;
+
+                            case 2:
+                                face.normalIndices.add(f);
+                                break;
+                        }
+
                     }
                 }
                 faces.add(face);

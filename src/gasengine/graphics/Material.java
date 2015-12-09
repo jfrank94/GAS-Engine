@@ -3,7 +3,7 @@ package gasengine.graphics;
 
 public class Material
 {
-    Shader mShader;
+    private Shader mShader;
 
     public Material(Shader shader) // FIXME temporary
     {
@@ -13,5 +13,10 @@ public class Material
     public void bind()
     {
         mShader.bind();
+    }
+
+    public Shader getShader()
+    {
+        return mShader;
     }
 }

@@ -94,18 +94,17 @@ public class TriangleRenderer extends Component
 
         for (MeshData.Face face : faces)
         {
-            List<Integer> t = face.indices;
-            switch (face.indices.size())
+            switch (face.vertexIndices.size())
             {
                 case 3:
-                    vertList.add(vertices.get(face.indices.get(0) - 1).vert);
-                    vertList.add(vertices.get(face.indices.get(1) - 1).vert);
-                    vertList.add(vertices.get(face.indices.get(2) - 1).vert);
+                    vertList.add(vertices.get(face.vertexIndices.get(0) - 1).vert);
+                    vertList.add(vertices.get(face.vertexIndices.get(1) - 1).vert);
+                    vertList.add(vertices.get(face.vertexIndices.get(2) - 1).vert);
 
                     normal = computeNormal(
-                            vertices.get(face.indices.get(0) - 1).vert,
-                            vertices.get(face.indices.get(1) - 1).vert,
-                            vertices.get(face.indices.get(2) - 1).vert
+                            vertices.get(face.vertexIndices.get(0) - 1).vert,
+                            vertices.get(face.vertexIndices.get(1) - 1).vert,
+                            vertices.get(face.vertexIndices.get(2) - 1).vert
                     );
 
                     normList.add(normal); normList.add(normal); normList.add(normal); // this is all terrible, inefficient and hacky
@@ -113,91 +112,25 @@ public class TriangleRenderer extends Component
                     break;
 
                 case 4:
-                    vertList.add(vertices.get(face.indices.get(0) - 1).vert);
-                    vertList.add(vertices.get(face.indices.get(1) - 1).vert);
-                    vertList.add(vertices.get(face.indices.get(2) - 1).vert);
+                    vertList.add(vertices.get(face.vertexIndices.get(0) - 1).vert);
+                    vertList.add(vertices.get(face.vertexIndices.get(1) - 1).vert);
+                    vertList.add(vertices.get(face.vertexIndices.get(2) - 1).vert);
 
-                    vertList.add(vertices.get(face.indices.get(0) - 1).vert);
-                    vertList.add(vertices.get(face.indices.get(2) - 1).vert);
-                    vertList.add(vertices.get(face.indices.get(3) - 1).vert);
+                    vertList.add(vertices.get(face.vertexIndices.get(0) - 1).vert);
+                    vertList.add(vertices.get(face.vertexIndices.get(2) - 1).vert);
+                    vertList.add(vertices.get(face.vertexIndices.get(3) - 1).vert);
 
                     normal = computeNormal(
-                            vertices.get(face.indices.get(0) - 1).vert,
-                            vertices.get(face.indices.get(1) - 1).vert,
-                            vertices.get(face.indices.get(2) - 1).vert
+                            vertices.get(face.vertexIndices.get(0) - 1).vert,
+                            vertices.get(face.vertexIndices.get(1) - 1).vert,
+                            vertices.get(face.vertexIndices.get(2) - 1).vert
                     );
 
                     normList.add(normal); normList.add(normal); normList.add(normal); // this is all terrible, inefficient and hacky
                     normList.add(normal); normList.add(normal); normList.add(normal);
 
                     break;
-                case 6:
-                    vertList.add(vertices.get(face.indices.get(0) - 1).vert);
-                    vertList.add(vertices.get(face.indices.get(dim) - 1).vert);
-                    if(dim < 3)
-                        vertList.add(vertices.get(face.indices.get(dim*2) - 1).vert);
 
-                    normal = computeNormal(
-                            vertices.get(face.indices.get(0) - 1).vert,
-                            vertices.get(face.indices.get(dim) - 1).vert,
-                            vertices.get(face.indices.get(dim*2) - 1).vert
-                    );
-
-                    normList.add(normal); normList.add(normal); normList.add(normal); // this is all terrible, inefficient and hacky
-
-                    break;
-                case 8:
-                    vertList.add(vertices.get(face.indices.get(0) - 1).vert);
-                    vertList.add(vertices.get(face.indices.get(dim) - 1).vert);
-                    vertList.add(vertices.get(face.indices.get(dim*2) - 1).vert);
-
-                    vertList.add(vertices.get(face.indices.get(0) - 1).vert);
-                    vertList.add(vertices.get(face.indices.get(dim*2) - 1).vert);
-                    vertList.add(vertices.get(face.indices.get(dim*3) - 1).vert);
-
-                    normal = computeNormal(
-                            vertices.get(face.indices.get(0) - 1).vert,
-                            vertices.get(face.indices.get(dim) - 1).vert,
-                            vertices.get(face.indices.get(dim*2) - 1).vert
-                    );
-
-                    normList.add(normal); normList.add(normal); normList.add(normal); // this is all terrible, inefficient and hacky
-                    normList.add(normal); normList.add(normal); normList.add(normal);
-
-                    break;
-                case 9:
-                    vertList.add(vertices.get(face.indices.get(0) - 1).vert);
-                    vertList.add(vertices.get(face.indices.get(dim) - 1).vert);
-                    vertList.add(vertices.get(face.indices.get(dim*2) - 1).vert);
-
-                    normal = computeNormal(
-                            vertices.get(face.indices.get(0) - 1).vert,
-                            vertices.get(face.indices.get(dim) - 1).vert,
-                            vertices.get(face.indices.get(dim*2) - 1).vert
-                    );
-
-                    normList.add(normal); normList.add(normal); normList.add(normal); // this is all terrible, inefficient and hacky
-
-                    break;
-                case 12:
-                    vertList.add(vertices.get(face.indices.get(0) - 1).vert);
-                    vertList.add(vertices.get(face.indices.get(dim) - 1).vert);
-                    vertList.add(vertices.get(face.indices.get(dim*2) - 1).vert);
-
-                    vertList.add(vertices.get(face.indices.get(0) - 1).vert);
-                    vertList.add(vertices.get(face.indices.get(dim*2) - 1).vert);
-                    vertList.add(vertices.get(face.indices.get(dim*3) - 1).vert);
-
-                    normal = computeNormal(
-                            vertices.get(face.indices.get(0) - 1).vert,
-                            vertices.get(face.indices.get(dim) - 1).vert,
-                            vertices.get(face.indices.get(dim*2) - 1).vert
-                    );
-
-                    normList.add(normal); normList.add(normal); normList.add(normal); // this is all terrible, inefficient and hacky
-                    normList.add(normal); normList.add(normal); normList.add(normal);
-
-                    break;
                 default:
                     throw new RuntimeException("Tried to load invalid obj file");
             }

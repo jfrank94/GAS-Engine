@@ -1,17 +1,14 @@
 package gasengine;
 
-import gasengine.audio.Sound;
 import gasengine.audio.SoundSystem;
 import gasengine.collections.SimpleHashMap;
 import gasengine.graphics.RenderSystem;
-import gasengine.graphics.components.Camera;
 import gasengine.scene.Scene;
 
 
 public final class Engine
 {
     private static RenderSystem sRenderSystem;
-
     private static SoundSystem sSoundSystem;
 
     private static Scene sScene;
@@ -45,8 +42,7 @@ public final class Engine
             params = new SimpleHashMap();
 
         sRenderSystem = new RenderSystem(params);
-
-        sSoundSystem = new SoundSystem();
+        sSoundSystem = new SoundSystem(params);
 
         sScene = new Scene();
 
